@@ -1,98 +1,92 @@
 import m from "mithril";
-import { Menu, Button, List, ListTile } from "polythene-mithril";
+import { Dialog, ToolbarTitle, List, SVG } from "polythene-mithril";
+import { radioButtonCheckedSVG, radioButtonUncheckedSVG } from "./svg";
+import { DialogFooter } from "./components/DialogFooter";
 
-const STORAGE_KEY = "mithril-template-converter__indent-index";
+const CloseSVG = m.trust("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"><path d=\"M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z\"/></svg>");
 
-const storageAvailable = type => {
-  try {
-    var storage = window[type],
-      x = "__storage_test__";
-    storage.setItem(x, x);
-    storage.removeItem(x);
-    return true;
-  } catch (e) {
-    return false;
-  }
-};
-
-const menuOptions = [
-  {
-    title: "2 Spaces",
-    id: "2"
-  },
-  {
-    title: "4 Spaces",
-    id: "4",
-    default: true
-  },
-  {
-    title: "Tab",
-    id: "tab"
-  }
-];
-const defaultMenuIndex = 0;
-
-const Settings = {
-  oninit: vnode => {
-    const indentId = vnode.attrs.indentId;
-
-    let defaultIndex = storageAvailable("localStorage")
-      ? localStorage.getItem(STORAGE_KEY)
-      : defaultMenuIndex;
-    if (defaultIndex === null) {
-      defaultIndex = defaultMenuIndex;
-    } else {
-      defaultIndex = Math.max(0, Math.min(defaultMenuIndex, defaultIndex));
-    }    
-    const setSelectedIndex = index => {
-      vnode.state.menu.selectedIndex = index;
-      localStorage.setItem(STORAGE_KEY, index);
-      indentId(menuOptions[index].id);
+export default ({ indent, setIndent, quotes, setQuotes }) => {
+  
+  const tileOptions = ({ title, value, test, update }) => {
+    const events = {
+      onclick: () => update(value)
     };
-    
-    vnode.state.menu = {
-      isVisible: false,
-      selectedIndex: defaultIndex,
-      setSelectedIndex
-    };
+    return ({
+      title,
+      events,
+      secondary: {
+        icon: {
+          svg: { content: m.trust(test(value) ? radioButtonCheckedSVG : radioButtonUncheckedSVG) }
+        },
+        events
+      }
+    });
+  };
 
-    setSelectedIndex(defaultMenuIndex);
-  },
-  view: vnode => {
-    const menu = vnode.state.menu;
-    return m(".indent-selector", [
-      m(Menu, {
-        target: "#indent-selections",
-        reposition: true,
-        show: menu.isVisible,
-        hideDelay: .140,
-        didHide: () => menu.isVisible = false,
-        size: 5,
-        offset: 0,
-        content: m(List, {
-          tiles: menuOptions.map((setting, index) =>
-            m(ListTile, {
-              className: index === menu.selectedIndex ? "selected": "",
-              hoverable: true,
-              title: setting.title,
-              selected: index === menu.selectedIndex,
-              ink: true,
-              events: {
-                onclick: () => menu.setSelectedIndex(index)
-              }
-            })
-          )
-        })
+  return {
+    fullBleed: true,
+    backdrop: true,
+    borders: "always",
+    body: [
+      m(List, {
+        compact: true,
+        header: { title: "Indent" },
+        all: {
+          hoverable: true,
+        },
+        tiles: [
+          tileOptions({
+            title: "2 spaces",
+            value: "2",
+            test: value => indent === value,
+            update: setIndent,
+          }),
+          tileOptions({
+            title: "4 spaces",
+            value: "4",
+            test: value => indent === value,
+            update: setIndent,
+          }),
+          tileOptions({
+            title: "Tabs",
+            value: "tab",
+            test: value => indent === value,
+            update: setIndent,
+          })
+        ]
       }),
-      m(Button, {
-        id: "indent-selections",
-        label: "Indent: " + menuOptions[menu.selectedIndex].title,
-        events: {
-          onclick: () => menu.isVisible = true
-        }
-      })
-    ]);
-  }
+      m(List, {
+        compact: true,
+        header: { title: "Quotes" },
+        all: {
+          hoverable: true,
+        },
+        tiles: [
+          tileOptions({
+            title: "Double",
+            value: "double",
+            test: value => quotes === value,
+            update: setQuotes,
+          }),
+          tileOptions({
+            title: "Single",
+            value: "single",
+            test: value => quotes === value,
+            update: setQuotes,
+          }),
+        ]
+      }),
+    ], 
+    footer: m(DialogFooter, {
+      events: {
+        onclick: Dialog.hide
+      },
+      content: [
+        m(ToolbarTitle, {
+          center: true,
+          content: m(SVG, { content: CloseSVG })
+        })
+      ]
+    })
+  };
 };
-
-export default Settings;

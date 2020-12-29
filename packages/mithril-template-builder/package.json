@@ -1,9 +1,9 @@
 {
   "name": "mithril-template-builder",
   "description": "Builder for Mithril HTML to JavaScript converter",
-  "main": "dist/mithril-template-builder.js",
+  "main": "dist/mithril-template-builder",
   "module": "dist/mithril-template-builder.mjs",
-  "version": "1.0.0",
+  "version": "1.3.0",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -11,17 +11,19 @@
   },
   "scripts": {
     "rollup": "../../node_modules/rollup/bin/rollup -c ../../scripts/rollup.umd.js && ../../node_modules/rollup/bin/rollup -c ../../scripts/rollup.es.js",
-    "build": "yarn run rollup"
+    "build": "yarn run rollup",
+    "test": "open ./test/testrunner.html"
   },
   "files": [
     "dist",
     "README.md"
   ],
-  "dependencies": {
-    "mithril": "^1.1.5"
+  "peerDependencies": {
+    "mithril": "^2.0.4"
   },
   "devDependencies": {
-    "chai": "^4.1.2",
-    "mocha": "^4.0.1"
+    "chai": "^4.2.0",
+    "mithril": "^2.0.4",
+    "mocha": "^6.2.0"
   }
 }
